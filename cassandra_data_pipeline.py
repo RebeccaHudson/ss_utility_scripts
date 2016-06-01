@@ -1,6 +1,6 @@
 import sqlite3
 import MySQLdb as mdb 
-#from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster
 import sys
 
 CASSANDRA_TABLE_NAME = 'snp_scores_5'
