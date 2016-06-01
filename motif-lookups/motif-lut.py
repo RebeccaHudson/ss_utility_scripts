@@ -13,13 +13,28 @@ lut_jaspar_motifs_by_tf = {}
 lut_tfs_by_jaspar_motifs = {}
 
 for line in lines:
-  print("line: " + line)
-  matchObj = re.search(r'>(M.+)\s(.+)', line)
-  motif_value = matchObj.groups(1)[0]
-  tf = matchObj.groups(1)[1]   
-  print("motif: " + motif_value + " tf:" + tf)
-  lut_tfs_by_jaspar_motifs[motif_value] = tf
-  lut_jaspar_motifs_by_tf[tf] = motif_value
+    print("line: " + line)
+    matchObj = re.search(r'>(M.+)\s(.+)', line)
+    motif_value = matchObj.groups(1)[0]
+    tf = matchObj.groups(1)[1]   
+    print("motif: " + motif_value + " tf:" + tf)
+    lut_tfs_by_jaspar_motifs[motif_value] = tf
+    
+    # this one needs to be extended, because, even though the
+    # mapping from motifs to transcription factors is one-to-one,
+    # the mapping from transcription factors to motifs is,
+    # in some cases, one-to-many.
+    if lut_jaspar_motifs_by_tf.has_key(tf):
+        if not type(lut_jaspar_motifs_by_tf[tf]) == list:
+            lut_jaspar_motifs_by_tf[tf] = [lut_jaspar_motifs_by_tf[tf], motif_value]
+        else: 
+            lut_jaspar_motifs_by_tf[tf].append(motif_value)
+    else:
+         lut_jaspar_motifs_by_tf[tf] = motif_value
+     
+
+
+
   #lookup works both ways!
 
 
@@ -32,8 +47,8 @@ def load_obj(name ):
     with open(name + '.pkl', 'rb') as f:
         return pickle.load(f)
   
-#save_obj(lut_jaspar_motifs_by_tf, 
-#         'lut_jaspar_motifs_by_tf')
+save_obj(lut_jaspar_motifs_by_tf, 
+         'lut_jaspar_motifs_by_tf')
 #
 #save_obj(lut_tfs_by_jaspar_motifs,
 #         'lut_tfs_by_jaspar_motif')
@@ -42,4 +57,7 @@ def load_obj(name ):
 
 happy = load_obj('lut_tfs_by_jaspar_motif')
 print("happy? " + str(type(happy)))
+
+
+# Need to rebuild this so that RUNX1 returns a list of 2 items...
 slappy = load_obj('lut_jaspar_motifs_by_tf')
