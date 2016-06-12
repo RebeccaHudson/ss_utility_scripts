@@ -8,6 +8,9 @@ import os
 
 """
 A script to import sqlite3 tables into Elasticsearch
+To use: give it one argument: the name of the directory to find the input files
+in with no trailling space.
+ then change DRY_RUN to False
 """
 DRY_RUN = True
 
@@ -23,8 +26,8 @@ def get_colnames_for_sqlite_table(sqlite_cursor):
 
 #takes a tuple that was returned from 'fetchone' 
 def parse_one_sqilte_row_into_json_data(colnames, fetched_record):
-    print colnames
-    print fetched_record  
+    #print colnames
+    #print fetched_record  
     happy = zip(colnames, fetched_record)
     happy = dict(happy)
     happy = json.dumps(happy)
@@ -62,12 +65,15 @@ def process_one_file_of_input_data(path_to_file, es):
     actions = []
     while one_sqlite_record is not None:
         i += 1
-        one_sqlite_record = sqlite_cursor.fetchone()
+
         json_data = parse_one_sqilte_row_into_json_data(colnames, one_sqlite_record)
+        actions.append(json_data)
         if i % bulk_loading_chunk_size == 0:
             print("reached "+ str(i) + ' rows')
-            put_bulk_json_into_elasticsearch(es, json_data)
+            put_bulk_json_into_elasticsearch(es, actions)
             actions = []
+
+        one_sqlite_record = sqlite_cursor.fetchone()
 
     print "placing the last " + str(len(actions)) + " rows from file into ES."
     put_bulk_json_into_elasticsearch(es, actions)
@@ -96,7 +102,4 @@ for one_file in os.listdir(input_path):
 #sqlite_input_dir='/ua/rhudson/data_in/whole_files/'
 #sqlite_file_name='db_1_1.db'
 #sqlite_file = sqlite_input_dir + sqlite_file_name
-
-
-
 
